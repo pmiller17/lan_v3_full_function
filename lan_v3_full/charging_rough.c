@@ -148,12 +148,12 @@ void charge_battery(void)
 				go_back_bulk = FALSE;
 			}	
 		
-			if(battery_current < 10)
+			if(battery_current < 30)
 			{
 				trickle_charge++;
 			}
 		
-			if(battery_current > 30)
+			if(battery_current > 50)
 			{
 				trickle_charge = 0;
 			}

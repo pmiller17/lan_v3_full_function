@@ -259,9 +259,9 @@ typedef enum
 
 typedef struct
 {
-	uint8_t debounce_button : 0;
-	uint8_t debounce_jack	: 0;
-	uint8_t update_runtime	: 0;
+	uint8_t debounce_button : 1;
+	uint8_t debounce_jack	: 1;
+	uint8_t timer			: 1;
 } task_t;
 
 #endif

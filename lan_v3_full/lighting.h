@@ -16,18 +16,50 @@
 	LIGHTING-RELATED-MACROS
 -------------------------------------------*/
 
-
-#define CFG_RUNTIME_TIMER do				\ 
+// when counting how long lantern's been running, interrupt every 133 seconds
+// io_clk / 1024
+#define CFG_TC0_RUNTIME do					\
 {											\
 	CLRBIT(TCCR0A,ICEN0);					\
 	SETBIT(TCCR0A,TCW0);					\
-	
+	SETBIT(TCCR0B,CS02);					\
+	CLRBIT(TCCR0B,CS01);					\
+	SETBIT(TCCR0B,CS00);					\
+} while (0)
 
-} while (0);
+//when done charging, blink every 8.3 seconds (io_clk/64)
+#define TC0_DONE_CHARGING_RATE do			\
+{											\
+	CLRBIT(TCCR0B,CS02);					\
+	SETBIT(TCCR0B,CS01);					\
+	SETBIT(TCCR0B,CS00);					\
+} while (0)
 
-#define RUNTIME_ISR_ENABLE
-#define RUNTIME_ISR_DISABLE
+//when charging, blink light every 33 seconds (io_clk/256)
+#define TC0_INDICATE_CHARGE_RATE do			\
+{											\
+	SETBIT(TCCR0B,CS02);					\
+	CLRBIT(TCCR0B,CS01);					\
+	CLRBIT(TCCR0B,CS00);					\
+} while (0)
 
+// when running light, every 134 seconds interrupt to update (io_clk/1024)
+#define TC0_RUNTIME_COUNTER_RATE do			\
+{											\
+	SETBIT(TCCR0B,CS02);					\
+	CLRBIT(TCCR0B,CS01);					\
+	SETBIT(TCCR0B,CS00);					\
+} while (0)
+
+#define TC0_STOP do							\
+{											\
+	SETBIT(TCCR0B,CS02);					\
+	CLRBIT(TCCR0B,CS01);					\
+	SETBIT(TCCR0B,CS00);					\
+} while (0)
+
+#define TC0_OVF_INT_ENABLE SETBIT(TIMSK,TOIE0);
+#define TC0_OVF_INT_DISABLE CLRBIT(TIMSK,TOIE0);
 
 //-----FUNCTION PROTOTYPES-------------------
 
@@ -36,8 +68,8 @@ void initialize_lighting_mode(void);
 void flicker_led(void); // may want to have input be number of times
 void led_control_current(uint8_t);
 void run_lighting_mode(void);
-unsigned int calculate_lantern_usage(void);
-
+float calculate_lantern_usage(void);
+void led_charging_indicate(void);
 //clearing battery_usage should be done as part of changing modes in the switch-case
 
 typedef enum

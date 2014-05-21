@@ -18,13 +18,14 @@
 #define TRUE 1
 #define FALSE 0
 
-#define BATTERY_USAGE_LIMIT
+#define BATTERY_USAGE_LIMIT 360000 //total seconds that can be used on low setting, 100 hrs
 
-volatile lantern_mode_t lantern_mode, previous_mode;
+volatile lantern_mode_t lantern_mode = LIGHTING;
+volatile lantern_mode_t previous_mode;
 volatile task_t task;
 int button_pressed = 0;
 int jack_plugged_in = 0;
-int battery_usage = 0;
+volatile float battery_usage = 0;
 
 int main(void)
 {
@@ -85,7 +86,7 @@ void setup(void)
 	PCI_ENABLE;
 	BUTTON_PCI_ENABLE;
 	JACK_PCI_ENABLE;
-	
+	CFG_TC0_RUNTIME;
 	FPWM_CLR_COMP_MATCH;
 	TURN_ON_PWM_CLK;
 #if 0	
@@ -93,9 +94,6 @@ void setup(void)
 	sleep_enable();
 #endif
 	
-	battery_current = 0;
-	battery_voltage = 0;
-	pwm_value = 0;
     sei();
 }
 
@@ -107,7 +105,7 @@ void loop(void)
 			if(task.debounce_button)
 			{	
 				button_pressed = debounce_button();
-				task.debounce = FALSE;
+				task.debounce_button = FALSE;
 			}
 			
 			if(button_pressed)
@@ -116,15 +114,19 @@ void loop(void)
 				button_pressed = FALSE;
 			}
 			
-			if(task.update_runtime)
+			if(task.timer)
 			{
-				battery_usage = calculate_lantern_usage();
-				task.update_runtime = FALSE;
+				float battery_increment;
+				battery_increment = calculate_lantern_usage();
+				battery_usage += battery_increment;
+				task.timer = FALSE;
 			}
 			
 			if(battery_usage > BATTERY_USAGE_LIMIT)
+			{
 				lantern_mode = NEEDS_CHARGE;
-			
+				battery_usage = 0;
+			}
 			/*need function to say "light LED"?*/
 			run_lighting_mode();	//will sleep if "OFF" and control light otherwise
 			
@@ -133,7 +135,12 @@ void loop(void)
 			
 		case CHARGING:
 			charge_battery();
-
+			if(task.timer == TRUE)
+			{
+				led_charging_indicate();
+				task.timer = FALSE;
+			}
+			
 		break;
 		
 		case NEEDS_CHARGE:
@@ -160,11 +167,14 @@ void loop(void)
 			if(jack_plugged_in)
 			{
 				lantern_mode = CHARGING;
+				initialize_charging_mode();
+				TC0_INDICATE_CHARGE_RATE;
 			}
 			else
 			{
 				lantern_mode = previous_mode;
-				set_up_noncharging(); 
+				initialize_lighting_mode();
+				BUTTON_PCI_ENABLE;
 				/*	re-enable stuff, set light to OFF?
 					button & jack PCI enables.
 				*/
@@ -179,28 +189,40 @@ void loop(void)
 
 ISR(TIMER0_OVF_vect)
 {
-	task.update_runtime = TRUE;
+	task.timer = TRUE;
 }
 
 ISR(PCINT_vect)
 {
+	cli();
 	if(JACK_PLUGGED_IN_NOW)
 	{
 		LED_DISABLE;
+		BUTTON_PCI_DISABLE;
 		/*other safety disables*/
-		previous_mode = lantern_mode;
+		if(lantern_mode == CHARGING || lantern_mode == LIGHTING)
+		{
+			previous_mode = lantern_mode;
+		}
+		
 		lantern_mode = SAFE_OFF;
 		task.debounce_jack = TRUE; 
 	}
 	
-	else if(BUTTON_PRESSED_NOW)
+	if(BUTTON_PRESSED_NOW)
 	{
 		task.debounce_button = TRUE;
 	}
 	
-	else if(JACK_PLUGGED_IN_NOW == FALSE)
+	if(lantern_mode == CHARGING)
 	{
-		previous_mode = lantern_mode;
-		lantern_mode = SAFE_OFF;
+		if(JACK_PLUGGED_IN_NOW == FALSE)
+		{
+			task.debounce_jack = TRUE;
+			lantern_mode = SAFE_OFF;
+			BUTTON_PCI_DISABLE;
+		}
 	}
+
+	sei();
 }
