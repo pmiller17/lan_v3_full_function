@@ -94,7 +94,12 @@ void charge_battery(void)
 					overvoltage_thresh_count = 0;
 				}
 			}
-		
+			
+			if(battery_voltage - current_offset > 230)
+			{
+				OCR1B -= 5;
+			}
+			
 			if(overvoltage_thresh_count >= 2000)
 			{
 				charging_mode = CONSTANT_VOLTAGE;
