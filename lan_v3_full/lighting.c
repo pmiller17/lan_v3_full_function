@@ -19,6 +19,8 @@
 #define BRIGHT_ENERGY 335.545 
 // multiply above by 100/40 to account for how much effective runtime is added on bright mode
 
+#define BATTERY_CUTOFF 178 // 5.6V
+
 lighting_mode_t lighting_mode;
 
 void cycle_led_mode(void)
@@ -56,6 +58,27 @@ void initialize_lighting_mode(void) // move this one to lan_v3_newtest.c
 	lighting_mode = OFF;
 }
 
+unsigned int is_battery_too_low(void)
+{
+	unsigned int battery_level;
+	unsigned static int too_low_count;
+	battery_level =	adc_read_vbatt();
+	
+	if(battery_level <= BATTERY_CUTOFF)
+	{
+		too_low_count++;
+	}
+	else if(battery_level > BATTERY_CUTOFF)
+	{
+		too_low_count = 0;
+	}
+	
+	if(too_low_count > 5)
+		return TRUE;
+	
+	else return FALSE;
+	
+}
 void flicker_led(void) // may want to have input be number of times
 {
 	int i; //for wasting time in a loop	

@@ -25,6 +25,7 @@ volatile lantern_mode_t previous_mode;
 volatile task_t task;
 int button_pressed = 0;
 int jack_plugged_in = 0;
+unsigned int battery_too_low = FALSE;
 volatile float battery_usage = 0;
 
 int main(void)
@@ -102,6 +103,8 @@ void loop(void)
 	switch(lantern_mode)
 	{
 		case LIGHTING:
+			
+			run_lighting_mode();
 			if(task.debounce_button)
 			{	
 				button_pressed = debounce_button();
@@ -122,13 +125,18 @@ void loop(void)
 				task.timer = FALSE;
 			}
 			
-			if(battery_usage > BATTERY_USAGE_LIMIT)
+			battery_too_low = is_battery_too_low();
+			
+			if((battery_usage > BATTERY_USAGE_LIMIT) || battery_too_low)
 			{
 				lantern_mode = NEEDS_CHARGE;
+				initialize_lighting_mode();
 				battery_usage = 0;
 			}
+			
+			
 			/*need function to say "light LED"?*/
-			run_lighting_mode();	//will sleep if "OFF" and control light otherwise
+				//will sleep if "OFF" and control light otherwise
 			
 		break;
 
@@ -151,8 +159,11 @@ void loop(void)
 			
 			if(button_pressed)
 			{
-				flicker_led();
+				for(int i = 0; i < 2; i++)
+					flicker_led();
+					
 				button_pressed = FALSE;
+				
 			}
 
 		break;

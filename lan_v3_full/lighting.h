@@ -70,6 +70,8 @@ void led_control_current(uint8_t);
 void run_lighting_mode(void);
 float calculate_lantern_usage(void);
 void led_charging_indicate(void);
+unsigned int is_battery_too_low(void);
+
 //clearing battery_usage should be done as part of changing modes in the switch-case
 
 typedef enum

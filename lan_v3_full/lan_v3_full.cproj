@@ -43,7 +43,7 @@
         <InterfaceProperties>
           <JtagEnableExtResetOnStartSession>false</JtagEnableExtResetOnStartSession>
           <IspClock>125000</IspClock>
-          <DebugWireClockDiv>2000</DebugWireClockDiv>
+          <DebugWireClockDiv>0</DebugWireClockDiv>
           <HvppClock>2000</HvppClock>
         </InterfaceProperties>
         <InterfaceName>debugWIRE</InterfaceName>
