@@ -127,7 +127,7 @@ void loop(void)
 			
 			battery_too_low = is_battery_too_low();
 			
-			if((battery_usage > BATTERY_USAGE_LIMIT) || battery_too_low)
+			if((battery_usage > BATTERY_USAGE_LIMIT) || (battery_too_low == TRUE))
 			{
 				lantern_mode = NEEDS_CHARGE;
 				initialize_lighting_mode();
