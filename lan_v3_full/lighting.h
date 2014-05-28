@@ -27,20 +27,20 @@
 	SETBIT(TCCR0B,CS00);					\
 } while (0)
 
-//when done charging, blink every 8.3 seconds (io_clk/64)
+//when done charging, blink every 1.3 seconds (io_clk/8)
 #define TC0_DONE_CHARGING_RATE do			\
 {											\
 	CLRBIT(TCCR0B,CS02);					\
 	SETBIT(TCCR0B,CS01);					\
-	SETBIT(TCCR0B,CS00);					\
+	CLRBIT(TCCR0B,CS00);					\
 } while (0)
 
-//when charging, blink light every 33 seconds (io_clk/256)
+//when charging, blink light every 8.3 seconds (io_clk/64)
 #define TC0_INDICATE_CHARGE_RATE do			\
 {											\
-	SETBIT(TCCR0B,CS02);					\
-	CLRBIT(TCCR0B,CS01);					\
-	CLRBIT(TCCR0B,CS00);					\
+	CLRBIT(TCCR0B,CS02);					\
+	SETBIT(TCCR0B,CS01);					\
+	SETBIT(TCCR0B,CS00);					\
 } while (0)
 
 // when running light, every 134 seconds interrupt to update (io_clk/1024)
@@ -71,6 +71,7 @@ void run_lighting_mode(void);
 float calculate_lantern_usage(void);
 void led_charging_indicate(void);
 unsigned int is_battery_too_low(void);
+void initialize_needs_charge(void);
 
 //clearing battery_usage should be done as part of changing modes in the switch-case
 

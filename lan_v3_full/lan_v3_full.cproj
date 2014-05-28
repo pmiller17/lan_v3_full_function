@@ -42,17 +42,17 @@
       <ToolOptions>
         <InterfaceProperties>
           <JtagEnableExtResetOnStartSession>false</JtagEnableExtResetOnStartSession>
-          <IspClock>125000</IspClock>
-          <DebugWireClockDiv>0</DebugWireClockDiv>
+          <IspClock>96540</IspClock>
+          <DebugWireClockDiv>2000</DebugWireClockDiv>
           <HvppClock>2000</HvppClock>
         </InterfaceProperties>
-        <InterfaceName>debugWIRE</InterfaceName>
+        <InterfaceName>ISP</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.avrdragon</ToolType>
       <ToolNumber>00A200012534</ToolNumber>
       <ToolName>AVR Dragon</ToolName>
     </com_atmel_avrdbg_tool_avrdragon>
-    <avrtoolinterface>debugWIRE</avrtoolinterface>
+    <avrtoolinterface>ISP</avrtoolinterface>
     <com_atmel_avrdbg_tool_simulator>
       <ToolOptions xmlns="">
         <InterfaceProperties>

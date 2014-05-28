@@ -7,6 +7,7 @@
 
 #include "lan.h"
 #include "adc.h"
+#include "lighting.h"
 #include "charging_rough.h"
 
 charging_mode_t charging_mode;
@@ -20,10 +21,6 @@ unsigned int current_offset = 0;
 volatile int battery_voltage;
 volatile int battery_current;
 
-void slow_start_charging(void)
-{
-	;
-}
 
 void initialize_charging_mode(void)
 {
@@ -39,7 +36,8 @@ void initialize_charging_mode(void)
 	OCR1B = 0;
 	
 	charging_mode = CONSTANT_CURRENT;
-			
+	
+	TC0_OVF_INT_ENABLE;		
 	ADC_ENABLE;
 //	ADC_ISR_ENABLE;
 	FPWM_CLR_COMP_MATCH;
@@ -95,9 +93,9 @@ void charge_battery(void)
 				}
 			}
 			
-			if(battery_voltage - current_offset > 230)
+			if(battery_voltage - current_offset > 240)
 			{
-				OCR1B -= 5;
+				OCR1B -= 3;
 			}
 			
 			if(overvoltage_thresh_count >= 2000)
@@ -166,6 +164,7 @@ void charge_battery(void)
 			if(trickle_charge >= 2000)
 			{
 				charging_mode = TRICKLE_CHARGE;
+				TC0_DONE_CHARGING_RATE;
 			}
 		
 		break;
