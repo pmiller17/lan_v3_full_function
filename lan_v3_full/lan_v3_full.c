@@ -122,18 +122,25 @@ void loop(void)
 				float battery_increment;
 				battery_increment = calculate_lantern_usage();
 				battery_usage += battery_increment;
+				
 				task.timer = FALSE;
 			}
 			
-			battery_too_low = is_battery_too_low();
 			
-			if((battery_usage > BATTERY_USAGE_LIMIT) || (battery_too_low == TRUE))
+			if(battery_usage > BATTERY_USAGE_LIMIT)
 			{
 				lantern_mode = NEEDS_CHARGE;
-				initialize_lighting_mode();
+				initialize_needs_charge();
 				battery_usage = 0;
 			}
 			
+			
+			battery_too_low = is_battery_too_low();
+			if(battery_too_low)
+			{
+				lantern_mode = NEEDS_CHARGE;
+				initialize_needs_charge();
+			}
 			
 			/*need function to say "light LED"?*/
 				//will sleep if "OFF" and control light otherwise
@@ -211,10 +218,8 @@ ISR(PCINT_vect)
 		LED_DISABLE;
 		BUTTON_PCI_DISABLE;
 		/*other safety disables*/
-		if(lantern_mode == CHARGING || lantern_mode == LIGHTING)
-		{
-			previous_mode = lantern_mode;
-		}
+
+		previous_mode = LIGHTING;
 		
 		lantern_mode = SAFE_OFF;
 		task.debounce_jack = TRUE; 

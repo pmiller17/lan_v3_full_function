@@ -10,16 +10,16 @@
 #include "adc.h"
 #include "lighting.h"
 
-#define DIM_CURRENT 35	// about 35 mA, 35/255 max reading
-#define BRIGHT_CURRENT 102 // about 100 mA, 100/255 max reading
-#define FLICKER_ON_TIME 1000 // just a guess
-#define FLICKER_OFF_TIME 1000 // just a guess
-#define FLICKER_TARGET_CURRENT 20 // just for blink -- current value not critical
+#define DIM_CURRENT 20	// about 35 mA, 35/255 max reading
+#define BRIGHT_CURRENT 83 // about 100 mA, 100/255 max reading
+#define FLICKER_ON_TIME 2000 // just a guess
+#define FLICKER_OFF_TIME 8000 // just a guess
+#define FLICKER_TARGET_CURRENT 10 // just for blink -- current value not critical
 #define DIM_ENERGY 134.218 // number of seconds between interrupts 
 #define BRIGHT_ENERGY 335.545 
 // multiply above by 100/40 to account for how much effective runtime is added on bright mode
 
-#define BATTERY_CUTOFF 178 // 5.6V
+#define BATTERY_CUTOFF 182 // 5.7V
 
 lighting_mode_t lighting_mode;
 
@@ -29,6 +29,7 @@ void cycle_led_mode(void)
 	{
 		case OFF:
 			lighting_mode = DIM;
+			OCR1B = 5;
 			TC0_OVF_INT_ENABLE;
 			TC0_RUNTIME_COUNTER_RATE;
 			FPWM_CLR_COMP_MATCH;
@@ -58,6 +59,13 @@ void initialize_lighting_mode(void) // move this one to lan_v3_newtest.c
 	lighting_mode = OFF;
 }
 
+void initialize_needs_charge(void)
+{
+	LED_DISABLE;
+	BUTTON_PCI_ENABLE;
+	TC0_STOP;
+	OCR1B = 0;
+}
 unsigned int is_battery_too_low(void)
 {
 	unsigned int battery_level;
@@ -81,15 +89,21 @@ unsigned int is_battery_too_low(void)
 }
 void flicker_led(void) // may want to have input be number of times
 {
-	int i; //for wasting time in a loop	
-	for(i = 0; i < FLICKER_ON_TIME; i++)
-		led_control_current(FLICKER_TARGET_CURRENT);
+	LED_ENABLE;
+	OCR1B = 20;
+	volatile int i = 0; //for wasting time in a loop	
+	while(i < FLICKER_ON_TIME)
+	{
+		i++;
+	}
 	
 	OCR1B = 0;
-	
-	for(i = 0; i < FLICKER_OFF_TIME; i++)
-		;
-	
+	i = 0;	
+	while(i < FLICKER_OFF_TIME)
+	{
+		i++;
+	}
+	LED_DISABLE;
 }
 
 void led_control_current(uint8_t target_current)
@@ -161,7 +175,7 @@ void led_charging_indicate(void)
 	volatile unsigned int timewaster = 0;
 	volatile unsigned int charging_pulse_width;
 	charging_pulse_width = OCR1B;
-	OCR1B = 10;
+	OCR1B = 7;
 	LED_ENABLE;
 	while(timewaster < 3000)
 		timewaster++;
