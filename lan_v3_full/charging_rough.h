@@ -11,9 +11,9 @@
 
 #include "lan.h"
 
-#define OVERVOLTAGE
-#define BULK_CURRENT
-#define TAPER_CURRENT
+#define OVERVOLTAGE 214 // about 6.7 V
+#define BULK_CURRENT 245 // about 750 mA
+#define TAPER_CURRENT 25 // about 75 mA
 
 void charge_battery(void);
 void initialize_charging_mode(void);

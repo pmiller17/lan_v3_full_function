@@ -37,7 +37,7 @@ void initialize_charging_mode(void)
 	battery_current = 0;
 	battery_voltage = 0;
 	OCR1B = 0;
-	
+	OCR1B = 1;
 	charging_mode = CONSTANT_CURRENT;
 			
 	ADC_ENABLE;
@@ -45,7 +45,7 @@ void initialize_charging_mode(void)
 	FPWM_CLR_COMP_MATCH;
 	TURN_ON_PWM_CLK;
 }
-
+#if 0
 void charge_battery(void)
 {
 	
@@ -188,4 +188,34 @@ void charge_battery(void)
 		
 		break;
 	}
+}
+#endif
+
+void charge_battery(void)
+{
+	battery_current = adc_read_ibatt();
+	battery_voltage = adc_read_vbatt();
+	
+	if(battery_current < BULK_CURRENT && battery_voltage < OVERVOLTAGE)
+	{
+		OCR1B++;
+	}
+	else if(battery_current > BULK_CURRENT || battery_voltage > OVERVOLTAGE)
+	{
+		OCR1B--;
+	}
+	
+	if(battery_voltage > (OVERVOLTAGE - 3) && battery_current < TAPER_CURRENT)
+	{
+		trickle_charge++;
+	}
+	else trickle_charge = 0;
+	
+	if(trickle_charge > 100)
+	{
+		TC0_DONE_CHARGING_RATE;
+	}
+	
+	
+	
 }
