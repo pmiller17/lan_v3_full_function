@@ -7,7 +7,7 @@
 
 */
 
-#include <avr/sleep.h>
+
 
 #include "lan.h"
 #include "adc.h"
@@ -92,7 +92,6 @@ void setup(void)
 	TURN_ON_PWM_CLK;
 #if 0	
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	sleep_enable();
 #endif
 	
     sei();

@@ -10,8 +10,8 @@
 #include "adc.h"
 #include "lighting.h"
 
-#define DIM_CURRENT 20	// about 35 mA, 35/255 max reading
-#define BRIGHT_CURRENT 83 // about 100 mA, 100/255 max reading
+#define DIM_CURRENT 23	// about 35 mA, 35/255 max reading
+#define BRIGHT_CURRENT 85 // about 100 mA, 100/255 max reading
 #define FLICKER_ON_TIME 2000 // just a guess
 #define FLICKER_OFF_TIME 8000 // just a guess
 #define FLICKER_TARGET_CURRENT 10 // just for blink -- current value not critical
@@ -54,6 +54,7 @@ void cycle_led_mode(void)
 void initialize_lighting_mode(void) // move this one to lan_v3_newtest.c
 {
 	LED_ENABLE;
+	CFG_IO_BUTTON;
 	BUTTON_PCI_ENABLE;
 	TC0_STOP;
 	lighting_mode = OFF;
@@ -62,6 +63,7 @@ void initialize_lighting_mode(void) // move this one to lan_v3_newtest.c
 void initialize_needs_charge(void)
 {
 	LED_DISABLE;
+	CFG_IO_BUTTON;
 	BUTTON_PCI_ENABLE;
 	TC0_STOP;
 	OCR1B = 0;
@@ -175,7 +177,7 @@ void led_charging_indicate(void)
 	volatile unsigned int timewaster = 0;
 	volatile unsigned int charging_pulse_width;
 	charging_pulse_width = OCR1B;
-	OCR1B = 7;
+	OCR1B = 6;
 	LED_ENABLE;
 	while(timewaster < 3000)
 		timewaster++;

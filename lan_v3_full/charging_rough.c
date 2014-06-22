@@ -36,7 +36,7 @@ void initialize_charging_mode(void)
 	OCR1B = 0;
 	OCR1B = 1;
 	charging_mode = CONSTANT_CURRENT;
-	
+	CFG_BUTTON_OFF;
 	TC0_OVF_INT_ENABLE;		
 	ADC_ENABLE;
 //	ADC_ISR_ENABLE;
@@ -199,6 +199,7 @@ void charge_battery(void)
 	{
 		OCR1B++;
 	}
+	
 	else if(battery_current > BULK_CURRENT || battery_voltage > OVERVOLTAGE)
 	{
 		OCR1B--;
@@ -210,7 +211,7 @@ void charge_battery(void)
 	}
 	else trickle_charge = 0;
 	
-	if(trickle_charge > 100)
+	if(trickle_charge > 50)
 	{
 		TC0_DONE_CHARGING_RATE;
 	}

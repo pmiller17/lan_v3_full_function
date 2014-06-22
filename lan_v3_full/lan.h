@@ -63,6 +63,15 @@ void loop(void);
     }                                   \
     while (0)
 
+//set the button pin to be default low and output so that pressing button doesn't change current readings
+#define CFG_BUTTON_OFF                  \
+do										\
+{										\
+	SETBIT(DDRB,BUTTON_PIN);			\
+	CLRBIT(PORTB,BUTTON_PIN);			\
+}										\
+while (0)
+
 #define CFG_IO_JACK						\
 	do									\
 	{									\
